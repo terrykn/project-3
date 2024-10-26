@@ -1,23 +1,358 @@
 package ruclinic;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
+import javafx.fxml.Initializable;
+import javafx.scene.control.*;
 import util.*;
 
 import java.io.File;
+import java.net.URL;
 import java.util.Iterator;
+import java.util.ResourceBundle;
 import java.util.Scanner;
 
-public class ClinicManagerController {
-    @FXML
-    private Label welcomeText;
+public class ClinicManagerController implements Initializable {
+    List<Appointment> allAppts = new List<Appointment>(); // list of appointments
+    List<Provider> allProviders = new List<Provider>(); // list of providers from the providers.txt
+    List<Patient> allPatients = new List<Patient>(); // list of patients
+    List<Technician> allTechnicians = new List<Technician>(); // list of technicians (rotational),can be used with Sort.rotateTechnicians
+    private final int LESSTHAN = -1;
+    private final int GREATERTHAN = 1;
+    private final int EQUAL = 0;
 
+    public final int NEXTTECHNICIANINDEX = 0; // index of the next technician to check for availability in rotation list
     @FXML
-    protected void onHelloButtonClick() {
-        welcomeText.setText("Welcome to JavaFX Application!");
+    private RadioButton officeVisit, imagingService; // radio buttons for apptTypeClicked
+    @FXML
+    private ComboBox timeslot, providerOrImaging;
+    @FXML
+    private DatePicker apptDate, dob;
+    @FXML
+    private TextField fname, lname;
+    @FXML
+    private Button scheduleButton, cancelButton;
+
+    /**
+     * initialize data for start
+     */
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        // load provider list and add providers that are DOCTORS to choice drop down
+        loadProvidersList();
+        for (Provider prov : allProviders) {
+            if (prov instanceof Doctor) {
+                this.providerOrImaging.getItems().add(prov.getProfile().getFname() + " " + prov.getProfile().getLname());
+            }
+        }
+        // add timeslot options to choice drop down (1-12)
+        for(int i = 1; i <= 12; i++) {
+            timeslot.getItems().add(new Timeslot(i));
+        }
+
     }
 
+    @FXML
+    void apptTypeClicked(ActionEvent event) {
+        /**
+        if (officeVisit.isSelected()) {
+            provider.setDisable(false);
+            provider.setOpacity(1.0);
+        } else if (imagingService.isSelected()) {
+            provider.setDisable(true);
+            provider.setOpacity(0.3);
+        }
+        */
+        if (officeVisit.isSelected()) {
+            providerOrImaging.getItems().clear();
+            for (Provider prov : allProviders) {
+                if (prov instanceof Doctor) {
+                    this.providerOrImaging.getItems().add(prov.getProfile().getFname() + " " + prov.getProfile().getLname());
+                }
+            }
+            providerOrImaging.setPromptText("Select Provider...");
+        } else if (imagingService.isSelected()) {
+            providerOrImaging.getItems().clear();
+            for (Radiology radiology : Radiology.values()) {
+                this.providerOrImaging.getItems().add(radiology.name());
+            }
+            providerOrImaging.setPromptText("Select Service...");
+        }
+    }
 
+    @FXML
+    void scheduleButtonClicked(ActionEvent event) {
+        // MAKE SURE INPUTS ARE NOT NULL, return if so, and check date validities
+        if(apptDate.getValue() == null || dob.getValue() == null || fname.getText().isEmpty() || lname.getText().isEmpty() || timeslot.getValue() == null || providerOrImaging.getValue() == null) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Invalid Input");
+            alert.setHeaderText("Missing Data Tokens");
+            alert.setContentText("Please fill in all fields.");
+            alert.showAndWait();
+            return;
+        }
+        Object[] validatingData = isValid_ApptDate(new Date(apptDate.getValue()));
+        if(!(Boolean) validatingData[0]) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Invalid Input");
+            alert.setHeaderText("Appointment Date is Invalid");
+            alert.setContentText((String) validatingData[1]);
+            alert.showAndWait();
+            return;
+        }
+        validatingData = isValid_DOB(new Date(dob.getValue()));
+        if(!(Boolean) validatingData[0]) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Invalid Input");
+            alert.setHeaderText("Date of Birth is Invalid");
+            alert.setContentText((String) validatingData[1]);
+            alert.showAndWait();
+            return;
+        }
+        // check if appt already exists for this person at date and time
+        Person patientFromInput = (Person) checkPatientExists(new Patient(new Profile(fname.getText(), lname.getText(), new Date(dob.getValue()))));
+        Date apptDateFromInput = new Date(apptDate.getValue());
+        if (officeVisit.isSelected()) {
+            Appointment newAppt = new Appointment(apptDateFromInput,Timeslot.getTimeslotNumber(convertTimeslotChoiceToTimeslot()),patientFromInput, (Person) convertProviderChoiceToProvider());
+            if (allAppts.contains(newAppt)) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Invalid Input");
+                alert.setHeaderText("Appointment Already Exists");
+                alert.setContentText(newAppt.getPatient() + " has an existing appointment at the same time slot.");
+                alert.setHeight(250);
+                alert.showAndWait();
+                return;
+            }
+            if(!isProviderAvailable(convertProviderChoiceToProvider(), newAppt.getDate(), newAppt.getTimeslot())) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Invalid Input");
+                alert.setHeaderText("Provider Not Available");
+                alert.setContentText(convertProviderChoiceToProvider().getProfile() + " is not available at slot " + Timeslot.getTimeslotNumber(newAppt.getTimeslot()));
+                alert.setHeight(250);
+                alert.showAndWait();
+                return;
+            }
+            allAppts.add(newAppt);
+            // add appt to patients visit list
+            if (newAppt.getPatient() instanceof Patient) {
+                Patient realPatientObj = (Patient) newAppt.getPatient();
+                realPatientObj.addVisit(new Visit(newAppt)); // add visit to patient
+            }
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Appointment Scheduled");
+            alert.setHeaderText("Appointment Type: Office Visit");
+            alert.setContentText("Appointment for " + newAppt.patient + " booked at " + newAppt.getDate() + " " + newAppt.getTimeslot() + " with " + newAppt.getProvider());
+            alert.setHeight(250);
+            alert.showAndWait();
+        } else if (imagingService.isSelected()) {
+            // check if next technician is available at timeslot, if not rotate
+            // if it is available, check if the imaging room at the technicians location is available during that timeslot
+            for(int i = 0; i < allTechnicians.size(); i++) { // for the length of the list,
+                if (isProviderAvailable((Provider) this.allTechnicians.get(NEXTTECHNICIANINDEX), apptDateFromInput, convertTimeslotChoiceToTimeslot())) { // if the technician is available at that timeslot
+                    // check if the room is available at that timeslot
+                    if (!isRoomAvailable(((Provider) this.allTechnicians.get(NEXTTECHNICIANINDEX)).getLocation(), convertRadiologyChoiceToRadiology(), apptDateFromInput, convertTimeslotChoiceToTimeslot())) {
+                        Sort.rotateTechnicians(this.allTechnicians);
+                        continue;
+                    }
+                    Person patient = checkPatientExists(new Patient(new Profile(fname.getText(), lname.getText(), new Date(dob.getValue()))));
+                    Appointment newAppointment = new Imaging(apptDateFromInput, Timeslot.getTimeslotNumber(convertTimeslotChoiceToTimeslot()), patientFromInput, (Provider) this.allTechnicians.get(NEXTTECHNICIANINDEX), convertRadiologyChoiceToRadiology());
+                    if (allAppts.contains(newAppointment)) {
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setTitle("Invalid Input");
+                        alert.setHeaderText("Appointment Already Exists");
+                        alert.setContentText(newAppointment.getPatient() + " has an existing appointment at the same time slot.");
+                        alert.setHeight(250);
+                        alert.showAndWait();
+                        return;
+                    }
+                    allAppts.add(newAppointment); // add to appt calendar and
+                    if (patient instanceof Patient) {
+                        Patient realPatientObj = (Patient) patient;
+                        realPatientObj.addVisit(new Visit(newAppointment)); // add visit to patient
+                    }
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Appointment Scheduled");
+                    alert.setHeaderText("Appointment Type: Imaging Service");
+                        alert.setContentText("Appointment for " + newAppointment.patient + " booked at " + newAppointment.getDate() + " " + newAppointment.getTimeslot() + " with " + newAppointment.getProvider() + " for " + providerOrImaging.getValue());
+                    alert.setHeight(250);
+                    alert.showAndWait();
+                    Sort.rotateTechnicians(this.allTechnicians);
+                    return;
+                } else {
+                    Sort.rotateTechnicians(this.allTechnicians);
+                }
+            }
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Invalid Input");
+            alert.setHeaderText("Technician Not Available");
+            alert.setContentText(convertProviderChoiceToProvider().getProfile() + " is not available at slot " + timeslot.getValue());
+            alert.setHeight(250);
+            alert.showAndWait();
+            return;
+        }
+    }
+    /**
+     * Check if a date is a valid appointment date, which must be:
+     * valid calendar date, not today, not a day before today, not a weekend, and within 6 months of today
+     * @param date the date to check
+     * @return True if valid, false otherwise
+     */
+    private Object[] isValid_ApptDate(Date date) {
+        String returnStr = "";
+        if (!date.isValid()) {
+            returnStr = "Appointment date: " + date + " is not a valid calendar date";
+        } else if (date.isToday() || date.compareTo(Date.TODAY()) == LESSTHAN) {
+            returnStr = "Appointment date: " + date + " is today or a date before today.";
+        } else if (!date.isWeekday()) {
+            returnStr = "Appointment date: " + date + " is Saturday or Sunday.";
+        } else if (date.compareTo(Date.sixMonthsFromToday()) != LESSTHAN) {
+            returnStr = "Appointment date: " + date + " is not within six months.";
+        }
+        boolean bool = date.isValid() && !(date.isToday()) && (date.compareTo(Date.TODAY()) != LESSTHAN) && date.isWeekday() && (date.compareTo(Date.sixMonthsFromToday()) == LESSTHAN);
+        return new Object[] {bool, returnStr};
+    }
+    /**
+     * Checks if the instance of Date is a valid date of birth for a patient
+     * @param date the date to check
+     * @return true if valid, false otherwise
+     */
+    private Object[] isValid_DOB(Date date) {
+        String returnStr = "";
+        if (!(date.isValid())) {
+            returnStr = "Patient dob: " + date + " is not a valid calendar date";
+        } else if (date.compareTo(Date.TODAY()) == GREATERTHAN || date.compareTo(Date.TODAY()) == EQUAL) {
+            returnStr = "Patient dob: " + date + " is today or a date after today.";
+        }
+        boolean bool = date.isValid() && !(date.isToday()) && (date.compareTo(Date.TODAY()) != GREATERTHAN);
+        return new Object[] {bool,returnStr};
+    }
+    /**
+     * Read from the providers.txt and make the list of all the different providers
+     * provider s can be D (doctors) or T (technicians), which are both extensions
+     * of the provider class with their own unique attributes
+     */
+    private void loadProvidersList() {
+        try {
+            File file = new File("C:\\Users\\olivi\\IdeaProjects\\project-3\\src\\main\\java\\ruclinic\\providers.txt");
+            Scanner scanner = new Scanner(file);
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                String[] providerInfo = line.split("  "); // split every 2 spaces
+                // sort each of the providerInfo into their respective attributes
+                String type = providerInfo[0]; // "D" for Doctor, "T" for Technician
+                String firstName = providerInfo[1];
+                String lastName = providerInfo[2];
+                Date birthDate = new Date(providerInfo[3]); // convert providerInfo[3] to Date object
+                Location location = Location.getLocationEnum(providerInfo[4]);
+                // Create a Profile instance using above info
+                Profile profile = new Profile(firstName, lastName, birthDate);
+                if (type.equals("D")) {
+                    Specialty specialty = Specialty.getSpecialtyEnum(providerInfo[5]);
+                    String npi = providerInfo[6];
+                    Doctor newDoctor = new Doctor(profile, location, specialty, npi);
+                    this.allProviders.add(newDoctor);
+                } else if (type.equals("T")) {
+                    String rate = providerInfo[5];
+                    Technician newTechnician = new Technician(profile, location, Integer.parseInt(rate));
+                    this.allProviders.add(newTechnician);
+                    this.allTechnicians.add(newTechnician); // added to the rotational list
+                } else {
+                    System.out.println("Invalid provider type.");
+                    return;
+                }
+            }
+            System.out.println("Providers loaded to the list.");
+            scanner.close();
+        } catch (Exception e) {
+            System.out.println("An error occurred when trying to load in that file.");
+        }
+    }
+    /**
+     * convert the provider chosen from the dropdown to a Provider object
+     * @return the Provider object from the allProviders array
+     */
+    private Provider convertProviderChoiceToProvider() {
+        String providerName = (String) providerOrImaging.getValue();
+        for (Provider prov : allProviders) {
+            if (prov.getProfile().getFname().equals(providerName.split(" ")[0]) && prov.getProfile().getLname().equals(providerName.split(" ")[1])) {
+                return prov;
+            }
+        }
+        return null;
+    }
+    /**
+     * convert the radiology service chosen from the dropdown to a Radiology Enum Obj
+     * @return  Radiology enum val
+     */
+    private Radiology convertRadiologyChoiceToRadiology() {
+        String radiologyName = (String) providerOrImaging.getValue();
+        return Radiology.valueOf(radiologyName);
+    }
+    /**
+     * convert timeslot chosen to a Timeslot object
+     */
+    private Timeslot convertTimeslotChoiceToTimeslot() {
+        return (Timeslot) timeslot.getValue();
+    }
+    /**
+     * checks if a patient already exists from allPatients, if not, add them to the list
+     * and returns the patient object
+     * @param person the patient object to check
+     * @return the Person object found and/or added
+     */
+    private Patient checkPatientExists(Person person) {
+        if (person instanceof Patient) {
+            Patient patient = (Patient) person;
+            for (Patient p : allPatients) {
+                if (p.equals(patient)) {
+                    return p;
+                }
+            }
+            allPatients.add(patient);
+            return patient;
+        } else {
+            System.out.println("The person is not a patient.");
+            return null;
+        }
+    }
+    /**
+     * check if Provider (can be either Doctor or Technician) is available at a timeslot
+     * @param provider the provider to check
+     * @param apptDate date of appt to check
+     * @param timeslot the timeslot to check if available
+     */
+    private boolean isProviderAvailable(Provider provider, Date apptDate, Timeslot timeslot) {
+        Iterator<Appointment> iterator = this.allAppts.iterator();
+        while (iterator.hasNext()) {
+            Appointment appointment = iterator.next();
+            if (appointment.getProvider().equals(provider) && appointment.getDate().equals(apptDate) && appointment.getTimeslot().equals(timeslot)) {
+                return false;
+            }
+        }
+        return true;
+    }
+    /**
+     * check if the room at a given location is available at a timeslot and date
+     * @param location the location to check
+     * @param room Radiology enum, room to check
+     * @param apptDate the date of the appointment
+     * @param timeslot the timeslot to check
+     */
+    private boolean isRoomAvailable(Location location, Radiology room, Date apptDate, Timeslot timeslot) {
+        Iterator<Appointment> iterator = this.allAppts.iterator();
+        while (iterator.hasNext()) {
+            Appointment appointment = iterator.next();
+            if (appointment instanceof Imaging)  {
+                Imaging imaging = (Imaging) appointment;
+                // if the room is already booked at that timeslot and date at that location
+                Provider provider = (Provider) imaging.getProvider(); // provider of appt
+                if (imaging.getRoom().equals(room) && imaging.getDate().equals(apptDate) && imaging.getTimeslot().equals(timeslot) && (provider.getLocation().equals(location))) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 }
 
 /*

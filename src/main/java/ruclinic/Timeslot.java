@@ -28,6 +28,25 @@ public class Timeslot implements Comparable<Timeslot> {
         this.minute = baseMinute;
     }
     /**
+     * another constructor given a string in format like 10:20 to convert it to a timeslot obj
+     * @param timeslotString the string to convert to a timeslot object
+     */
+    public Timeslot(String timeslotString) {
+        System.out.println("here");
+        // Split the time and the period (AM/PM)
+        String[] timeParts = timeslotString.split(" ");
+        String time = timeParts[0]; // "10:20"
+        String period = timeParts[1]; // "am" or "pm"
+        // Split the hour and minutes
+        String[] hourMinute = time.split(":");
+        int hour = Integer.parseInt(hourMinute[0]); // Get the hour part
+        int minutes = Integer.parseInt(hourMinute[1]); // Get the minute part
+        // Convert to military time if needed
+        if (period.equals("PM")) {
+            hour += 12; // Convert PM hours to military time
+        }
+    }
+    /**
      * static method, called Timeslot.isValidTimeslot, check if string (that's supposed to be a timeslot) is a valid timeslot
      * @param timeslotString the string to check
      * @return true if the string is a valid timeslot, false otherwise

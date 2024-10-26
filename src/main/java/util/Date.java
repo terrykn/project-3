@@ -20,6 +20,15 @@ public class Date implements Comparable<Date> {
         this.year = 0;
     }
     /**
+     * Constructor for creating a new date object given a locatDate from the datePicker in java fx
+     * @param localDate LocalDate object to set the date object to
+     */
+    public Date(java.time.LocalDate localDate) {
+        this.month = localDate.getMonthValue();
+        this.day = localDate.getDayOfMonth();
+        this.year = localDate.getYear();
+    }
+    /**
      * Constructor for creating a new Date object with a given date
      * @param date Date to set the date object to, in format "mm/dd/yyyy"
      */
