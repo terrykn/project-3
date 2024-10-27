@@ -49,20 +49,10 @@ public class ClinicManagerController implements Initializable {
         for(int i = 1; i <= 12; i++) {
             timeslot.getItems().add(new Timeslot(i));
         }
-
     }
 
     @FXML
     void apptTypeClicked(ActionEvent event) {
-        /**
-        if (officeVisit.isSelected()) {
-            provider.setDisable(false);
-            provider.setOpacity(1.0);
-        } else if (imagingService.isSelected()) {
-            provider.setDisable(true);
-            provider.setOpacity(0.3);
-        }
-        */
         if (officeVisit.isSelected()) {
             providerOrImaging.getItems().clear();
             for (Provider prov : allProviders) {
@@ -80,6 +70,10 @@ public class ClinicManagerController implements Initializable {
         }
     }
 
+    /**
+     * for scheduling both office and imaging appts when the schedule button is clicked
+     * @param event of the schedule button being pressed
+     */
     @FXML
     void scheduleButtonClicked(ActionEvent event) {
         // MAKE SURE INPUTS ARE NOT NULL, return if so, and check date validities
@@ -191,6 +185,72 @@ public class ClinicManagerController implements Initializable {
             return;
         }
     }
+    /**
+     * for cancelling an appointment in the Schedule / Cancel tab
+     * @param event of the cancel button being pressed
+     */
+    @FXML
+    void cancelButtonClicked(ActionEvent event) {
+        // MAKE SURE INPUTS ARE NOT NULL, return if so, and check date validities
+        if(apptDate.getValue() == null || dob.getValue() == null || fname.getText().isEmpty() || lname.getText().isEmpty() || timeslot.getValue() == null || providerOrImaging.getValue() == null) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Invalid Input");
+            alert.setHeaderText("Missing Data Tokens");
+            alert.setContentText("Please fill in all fields.");
+            alert.showAndWait();
+            return;
+        }
+        Object[] validatingData = isValid_ApptDate(new Date(apptDate.getValue()));
+        if(!(Boolean) validatingData[0]) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Invalid Input");
+            alert.setHeaderText("Appointment Date is Invalid");
+            alert.setContentText((String) validatingData[1]);
+            alert.showAndWait();
+            return;
+        }
+        validatingData = isValid_DOB(new Date(dob.getValue()));
+        if(!(Boolean) validatingData[0]) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Invalid Input");
+            alert.setHeaderText("Date of Birth is Invalid");
+            alert.setContentText((String) validatingData[1]);
+            alert.showAndWait();
+            return;
+        }
+        // now check if the appointment exists, if not, return
+        Person personPatient = (Person) checkPatientExists(new Patient(new Profile(fname.getText(), lname.getText(), new Date(dob.getValue()))));
+        Appointment appointment = new Appointment(new Date(apptDate.getValue()), Timeslot.getTimeslotNumber(convertTimeslotChoiceToTimeslot()), personPatient, (Person) convertProviderChoiceToProvider());
+        if (!(allAppts.contains(appointment))) { // if it does not contain the appt, return
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Invalid Input");
+            alert.setHeaderText("Appointment Does Not Exist!");
+            alert.setContentText(appointment.getDate() + " " + appointment.getTimeslot() + " " + (new Profile(fname.getText(), lname.getText(), new Date(dob.getValue()))) + " - appointment does not exist.");
+            alert.setHeight(250);
+            alert.showAndWait();
+            return;
+        }
+        // now remove the appt from the allAppts list and from the persons visit array
+        if (personPatient instanceof Patient) {
+            Patient patient = (Patient) personPatient;
+            patient.removeVisit(appointment); // then remove the appointment from the Patients linked list of visits
+            allAppts.remove(appointment); // remove the appointment from the list of all appointments
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Appointment Cancellation");
+            alert.setHeaderText("Appointment Canceled");
+            alert.setContentText(appointment.getDate() + " " + appointment.getTimeslot() + " " + (new Profile(fname.getText(), lname.getText(), new Date(dob.getValue()))) + " - appointment has been canceled.");
+            alert.setHeight(250);
+            alert.showAndWait();
+        } else {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Invalid Input");
+            alert.setHeaderText("Person Not a Patient");
+            alert.setContentText("The person associated with this appointment is not a patient.");
+            alert.setHeight(250);
+            alert.showAndWait();
+        }
+    }
+
     /**
      * Check if a date is a valid appointment date, which must be:
      * valid calendar date, not today, not a day before today, not a weekend, and within 6 months of today
