@@ -148,7 +148,99 @@
           </Tab>
           <Tab text="Reschedule">
             <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <GridPane prefHeight="413.0" prefWidth="616.0">
+                          <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="200.66668701171875" minWidth="10.0" prefWidth="157.66666666666666" />
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="339.3333435058594" minWidth="10.0" prefWidth="282.33333333333337" />
+                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="232.66668701171875" minWidth="10.0" prefWidth="168.66668701171875" />
+                          </columnConstraints>
+                          <rowConstraints>
+                            <RowConstraints maxHeight="166.66665649414062" minHeight="10.0" prefHeight="145.33331298828125" vgrow="SOMETIMES" />
+                            <RowConstraints maxHeight="226.66668319702148" minHeight="10.0" prefHeight="59.66666666666666" vgrow="SOMETIMES" />
+                            <RowConstraints maxHeight="215.99998982747394" minHeight="10.0" prefHeight="55.33332824707034" vgrow="SOMETIMES" />
+                              <RowConstraints maxHeight="215.99998982747394" minHeight="10.0" prefHeight="154.6666717529297" vgrow="SOMETIMES" />
+                          </rowConstraints>
+                           <children>
+                              <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Patient" GridPane.valignment="TOP">
+                                 <GridPane.margin>
+                                    <Insets left="100.0" top="30.0" />
+                                 </GridPane.margin>
+                                 <font>
+                                    <Font size="16.0" />
+                                 </font>
+                                 <effect>
+                                    <Glow />
+                                 </effect>
+                              </Text>
+                              <VBox prefHeight="143.0" prefWidth="285.0" spacing="8.0" GridPane.columnIndex="1">
+                                 <children>
+                                    <TextField fx:id="t2_fname" prefHeight="5.0" prefWidth="281.0" promptText="First Name">
+                                       <VBox.margin>
+                                          <Insets left="15.0" right="15.0" top="30.0" />
+                                       </VBox.margin>
+                                    </TextField>
+                                    <TextField fx:id="t2_lname" prefHeight="5.0" prefWidth="281.0" promptText="Last Name">
+                                       <VBox.margin>
+                                          <Insets left="15.0" right="15.0" />
+                                       </VBox.margin>
+                                    </TextField>
+                                    <DatePicker fx:id="t2_dob" promptText="DOB">
+                                       <VBox.margin>
+                                          <Insets left="15.0" />
+                                       </VBox.margin>
+                                    </DatePicker>
+                                 </children>
+                              </VBox>
+                              <Text fill="#fb3535" strokeType="OUTSIDE" strokeWidth="0.0" text="Old Appointment" GridPane.rowIndex="1" GridPane.valignment="TOP">
+                                 <font>
+                                    <Font size="16.0" />
+                                 </font>
+                                 <GridPane.margin>
+                                    <Insets left="28.0" top="15.0" />
+                                 </GridPane.margin>
+                                 <effect>
+                                    <Glow />
+                                 </effect>
+                              </Text>
+                              <Text fill="#5ca64f" strokeType="OUTSIDE" strokeWidth="0.0" text="New Appointment" GridPane.rowIndex="2" GridPane.valignment="TOP">
+                                 <GridPane.margin>
+                                    <Insets left="24.0" top="15.0" />
+                                 </GridPane.margin>
+                                 <effect>
+                                    <Glow />
+                                 </effect>
+                                 <font>
+                                    <Font size="16.0" />
+                                 </font>
+                              </Text>
+                              <HBox prefHeight="100.0" prefWidth="200.0" spacing="15.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                 <children>
+                                    <DatePicker fx:id="t2_apptDate" prefHeight="25.0" prefWidth="132.0" promptText="Appt Date">
+                                       <opaqueInsets>
+                                          <Insets />
+                                       </opaqueInsets>
+                                       <HBox.margin>
+                                          <Insets left="15.0" top="15.0" />
+                                       </HBox.margin>
+                                    </DatePicker>
+                                    <ComboBox fx:id="t2_timeslot" prefHeight="25.0" prefWidth="99.0" promptText="Timeslot">
+                                       <HBox.margin>
+                                          <Insets top="15.0" />
+                                       </HBox.margin>
+                                    </ComboBox>
+                                 </children>
+                              </HBox>
+                              <ComboBox fx:id="t2_newTimeslot" prefWidth="150.0" promptText="New Timeslot" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                 <GridPane.margin>
+                                    <Insets left="15.0" />
+                                 </GridPane.margin>
+                              </ComboBox>
+                              <Button fx:id="t2_rescheduleButton" mnemonicParsing="false" onAction="#rescheduleButtonClicked" prefHeight="25.0" prefWidth="170.0" text="Reschedule" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
+                           </children>
+                        </GridPane>
+                     </children></AnchorPane>
             </content>
           </Tab>
             <Tab text="View Appts">

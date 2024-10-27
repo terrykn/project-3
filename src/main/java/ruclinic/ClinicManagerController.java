@@ -6,6 +6,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import util.*;
 
+import javax.swing.*;
 import java.io.File;
 import java.net.URL;
 import java.util.Iterator;
@@ -25,14 +26,13 @@ public class ClinicManagerController implements Initializable {
     @FXML
     private RadioButton officeVisit, imagingService; // radio buttons for apptTypeClicked
     @FXML
-    private ComboBox timeslot, providerOrImaging;
+    private ComboBox timeslot, providerOrImaging, t2_timeslot, t2_newTimeslot;
     @FXML
-    private DatePicker apptDate, dob;
+    private DatePicker apptDate, dob, t2_apptDate, t2_dob;
     @FXML
-    private TextField fname, lname;
+    private TextField fname, lname, t2_fname, t2_lname;
     @FXML
-    private Button scheduleButton, cancelButton;
-
+    private Button scheduleButton, cancelButton, t2_rescheduleButton;
     /**
      * initialize data for start
      */
@@ -48,9 +48,15 @@ public class ClinicManagerController implements Initializable {
         // add timeslot options to choice drop down (1-12)
         for(int i = 1; i <= 12; i++) {
             timeslot.getItems().add(new Timeslot(i));
+            t2_timeslot.getItems().add(new Timeslot(i));
+            t2_newTimeslot.getItems().add(new Timeslot(i));
         }
     }
-
+    /**
+     * for when the radio buttons are clicked in the schedule/cancel tab.
+     * changes the providerOrImaging dropdown to show the correct options
+     * @param event of radio button being clicked
+     */
     @FXML
     void apptTypeClicked(ActionEvent event) {
         if (officeVisit.isSelected()) {
@@ -69,7 +75,6 @@ public class ClinicManagerController implements Initializable {
             providerOrImaging.setPromptText("Select Service...");
         }
     }
-
     /**
      * for scheduling both office and imaging appts when the schedule button is clicked
      * @param event of the schedule button being pressed
@@ -250,6 +255,83 @@ public class ClinicManagerController implements Initializable {
             alert.showAndWait();
         }
     }
+    @FXML
+    /**
+     * for rescheduling an appointment in tab 2
+     * @param event of the reschedule button being pressed
+     */
+    void rescheduleButtonClicked(ActionEvent event) {
+        // MAKE SURE INPUTS ARE NOT NULL, return if so, and check dates valid?
+        if(t2_apptDate.getValue() == null || t2_dob.getValue() == null || t2_fname.getText().isEmpty() || t2_lname.getText().isEmpty() || t2_timeslot.getValue() == null || t2_newTimeslot.getValue() == null) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Invalid Input");
+            alert.setHeaderText("Missing Data Tokens");
+            alert.setContentText("Please fill in all fields.");
+            alert.showAndWait();
+            return;
+        }
+        Object[] validatingData = isValid_ApptDate(new Date(t2_apptDate.getValue()));
+        if(!(Boolean) validatingData[0]) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Invalid Input");
+            alert.setHeaderText("Appointment Date is Invalid");
+            alert.setContentText((String) validatingData[1]);
+            alert.showAndWait();
+            return;
+        }
+        validatingData = isValid_DOB(new Date(t2_dob.getValue()));
+        if(!(Boolean) validatingData[0]) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Invalid Input");
+            alert.setHeaderText("Date of Birth is Invalid");
+            alert.setContentText((String) validatingData[1]);
+            alert.showAndWait();
+            return;
+        }
+        // check if the appointment exists, if not, return
+        Person patientFromInput = (Person) checkPatientExists(new Patient(new Profile(t2_fname.getText(), t2_lname.getText(), new Date(t2_dob.getValue()))));
+        Appointment appointment = new Appointment(new Date(t2_apptDate.getValue()), Timeslot.getTimeslotNumber((Timeslot) t2_timeslot.getValue()), patientFromInput, (Person) allProviders.get(0)); //set to random provider temporarily (this isnt considered when comparing appts)
+        if (!(allAppts.contains(appointment))) { // if it does not contain the appt, return
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Invalid Input");
+            alert.setHeaderText("Appointment Does Not Exist!");
+            alert.setContentText(appointment.getDate() + " " + appointment.getTimeslot() + " " + (new Profile(t2_fname.getText(), t2_lname.getText(), new Date(t2_dob.getValue()))) + " - appointment does not exist.");
+            alert.setHeight(250);
+            alert.showAndWait();
+            return;
+        }
+        appointment = (Appointment) allAppts.get(allAppts.indexOf(appointment));
+        // make sure not imaging appt because we cannot reschedule those
+        if (appointment instanceof Imaging) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Invalid Input");
+            alert.setHeaderText("Cannot Reschedule Imaging Appt");
+            alert.setContentText("Imaging appointments cannot be rescheduled.");
+            alert.setHeight(250);
+            alert.showAndWait();
+            return;
+        }
+        // check if provider is available at new timeslot
+        Provider prov = (Provider) appointment.getProvider();
+        if(!isProviderAvailable(prov, appointment.getDate(), (Timeslot) t2_newTimeslot.getValue())) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Invalid Input");
+            alert.setHeaderText("Provider Not Available");
+            alert.setContentText(convertProviderChoiceToProvider().getProfile() + " is not available at slot " + ((Timeslot) t2_newTimeslot.getValue()));
+            alert.setHeight(250);
+            alert.showAndWait();
+            return;
+        }
+        // now after all of that, we can finally rescchedule the appointment, changing it here also changes it in the visits linked list of the patient because they are same reference
+        appointment.setTimeslot((Timeslot) t2_newTimeslot.getValue());
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Successful Reschedule");
+        alert.setHeaderText("Appointment Successfully Rescheduled");
+        alert.setContentText("Appointment for " + appointment.getPatient() + " has been rescheduled to " + appointment.getDate() + " " + appointment.getTimeslot());
+        alert.setHeight(250);
+        alert.showAndWait();
+        return;
+    }
 
     /**
      * Check if a date is a valid appointment date, which must be:
@@ -317,14 +399,14 @@ public class ClinicManagerController implements Initializable {
                     this.allProviders.add(newTechnician);
                     this.allTechnicians.add(newTechnician); // added to the rotational list
                 } else {
-                    System.out.println("Invalid provider type.");
+                    //System.out.println("Invalid provider type.");
                     return;
                 }
             }
-            System.out.println("Providers loaded to the list.");
+            //System.out.println("Providers loaded to the list.");
             scanner.close();
         } catch (Exception e) {
-            System.out.println("An error occurred when trying to load in that file.");
+            //System.out.println("An error occurred when trying to load in that file.");
         }
     }
     /**
