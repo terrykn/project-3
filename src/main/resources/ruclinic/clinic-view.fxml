@@ -7,6 +7,7 @@
 <?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.effect.Glow?>
@@ -19,24 +20,24 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="444.0" prefWidth="616.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ruclinic.ClinicManagerController">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="544.0" prefWidth="716.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ruclinic.ClinicManagerController">
    <children>
-      <TabPane prefHeight="440.0" prefWidth="616.0" tabClosingPolicy="UNAVAILABLE">
+      <TabPane prefHeight="547.0" prefWidth="716.0" tabClosingPolicy="UNAVAILABLE">
         <tabs>
           <Tab text="Schedule / Cancel">
             <content>
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
-                        <GridPane prefHeight="410.0" prefWidth="617.0">
+                        <GridPane prefHeight="515.0" prefWidth="716.0">
                           <columnConstraints>
                             <ColumnConstraints hgrow="SOMETIMES" maxWidth="201.3333740234375" minWidth="10.0" prefWidth="106.00003051757812" />
                             <ColumnConstraints hgrow="SOMETIMES" maxWidth="304.9999694824219" minWidth="10.0" prefWidth="304.9999694824219" />
                               <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                           </columnConstraints>
                           <rowConstraints>
-                            <RowConstraints maxHeight="153.3333511352539" minHeight="10.0" prefHeight="152.66666412353516" vgrow="SOMETIMES" />
-                            <RowConstraints maxHeight="215.99997456868488" minHeight="10.0" prefHeight="161.33333587646484" vgrow="SOMETIMES" />
-                            <RowConstraints maxHeight="94.99998474121094" minHeight="2.5431315123114473E-5" prefHeight="57.333353678385436" vgrow="SOMETIMES" />
+                            <RowConstraints maxHeight="207.3333282470703" minHeight="10.0" prefHeight="165.5555877685547" vgrow="SOMETIMES" />
+                            <RowConstraints maxHeight="222.0" minHeight="10.0" prefHeight="179.4444122314453" vgrow="SOMETIMES" />
+                            <RowConstraints maxHeight="201.99998982747394" minHeight="2.5431315123114473E-5" prefHeight="145.33333333333331" vgrow="SOMETIMES" />
                           </rowConstraints>
                            <children>
                               <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Appointment" GridPane.valignment="TOP">
@@ -61,11 +62,17 @@
                                              <toggleGroup>
                                                 <ToggleGroup fx:id="ApptType" />
                                              </toggleGroup>
+                                             <font>
+                                                <Font size="14.0" />
+                                             </font>
                                           </RadioButton>
                                           <RadioButton fx:id="imagingService" mnemonicParsing="false" onAction="#apptTypeClicked" text="Imaging Service" toggleGroup="$ApptType">
                                              <padding>
                                                 <Insets left="9.0" top="14.0" />
                                              </padding>
+                                             <font>
+                                                <Font size="14.0" />
+                                             </font>
                                           </RadioButton>
                                        </children>
                                        <VBox.margin>
@@ -74,12 +81,12 @@
                                     </HBox>
                                     <DatePicker fx:id="apptDate" prefHeight="25.0" prefWidth="155.0" promptText="Appt Date">
                                        <VBox.margin>
-                                          <Insets left="15.0" />
+                                          <Insets left="15.0" top="5.0" />
                                        </VBox.margin>
                                     </DatePicker>
                                     <HBox prefHeight="43.0" prefWidth="305.0">
                                        <children>
-                                          <ComboBox fx:id="timeslot" prefHeight="25.0" prefWidth="155.0" promptText="Choose Timeslot...">
+                                          <ComboBox fx:id="timeslot" prefHeight="25.0" prefWidth="161.0" promptText="Choose Timeslot...">
                                              <HBox.margin>
                                                 <Insets left="15.0" top="12.0" />
                                              </HBox.margin>
@@ -113,30 +120,42 @@
                                        <VBox.margin>
                                           <Insets left="15.0" top="15.0" />
                                        </VBox.margin>
+                                       <font>
+                                          <Font size="14.0" />
+                                       </font>
                                     </TextField>
                                     <TextField fx:id="lname" prefHeight="25.0" prefWidth="199.0" promptText="Last Name">
                                        <VBox.margin>
                                           <Insets left="15.0" top="15.0" />
                                        </VBox.margin>
+                                       <font>
+                                          <Font size="14.0" />
+                                       </font>
                                     </TextField>
-                                    <DatePicker fx:id="dob" promptText="DOB">
+                                    <DatePicker fx:id="dob" prefHeight="27.0" prefWidth="189.0" promptText="DOB">
                                        <VBox.margin>
                                           <Insets left="15.0" top="15.0" />
                                        </VBox.margin>
                                     </DatePicker>
                                  </children>
                               </VBox>
-                              <HBox prefHeight="101.0" prefWidth="305.0" spacing="30.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                              <HBox prefHeight="134.0" prefWidth="305.0" spacing="30.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
                                  <children>
                                     <Button fx:id="scheduleButton" mnemonicParsing="false" onAction="#scheduleButtonClicked" prefHeight="25.0" prefWidth="137.0" text="Schedule" textFill="#28861a">
                                        <HBox.margin>
                                           <Insets top="15.0" />
                                        </HBox.margin>
+                                       <font>
+                                          <Font size="17.0" />
+                                       </font>
                                     </Button>
                                     <Button fx:id="cancelButton" mnemonicParsing="false" onAction="#cancelButtonClicked" prefHeight="25.0" prefWidth="137.0" text="Cancel" textFill="RED">
                                        <HBox.margin>
                                           <Insets top="15.0" />
                                        </HBox.margin>
+                                       <font>
+                                          <Font size="17.0" />
+                                       </font>
                                     </Button>
                                  </children>
                               </HBox>
@@ -150,22 +169,22 @@
             <content>
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
-                        <GridPane prefHeight="413.0" prefWidth="616.0">
+                        <GridPane prefHeight="516.0" prefWidth="716.0">
                           <columnConstraints>
                             <ColumnConstraints hgrow="SOMETIMES" maxWidth="200.66668701171875" minWidth="10.0" prefWidth="157.66666666666666" />
                             <ColumnConstraints hgrow="SOMETIMES" maxWidth="339.3333435058594" minWidth="10.0" prefWidth="282.33333333333337" />
                               <ColumnConstraints hgrow="SOMETIMES" maxWidth="232.66668701171875" minWidth="10.0" prefWidth="168.66668701171875" />
                           </columnConstraints>
                           <rowConstraints>
-                            <RowConstraints maxHeight="166.66665649414062" minHeight="10.0" prefHeight="145.33331298828125" vgrow="SOMETIMES" />
-                            <RowConstraints maxHeight="226.66668319702148" minHeight="10.0" prefHeight="59.66666666666666" vgrow="SOMETIMES" />
-                            <RowConstraints maxHeight="215.99998982747394" minHeight="10.0" prefHeight="55.33332824707034" vgrow="SOMETIMES" />
+                            <RowConstraints maxHeight="215.55558268229166" minHeight="10.0" prefHeight="179.11112467447916" vgrow="SOMETIMES" />
+                            <RowConstraints maxHeight="226.66668319702148" minHeight="10.0" prefHeight="79.00000000000003" vgrow="SOMETIMES" />
+                            <RowConstraints maxHeight="215.99998982747394" minHeight="10.0" prefHeight="76.33333333333337" vgrow="SOMETIMES" />
                               <RowConstraints maxHeight="215.99998982747394" minHeight="10.0" prefHeight="154.6666717529297" vgrow="SOMETIMES" />
                           </rowConstraints>
                            <children>
                               <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Patient" GridPane.valignment="TOP">
                                  <GridPane.margin>
-                                    <Insets left="100.0" top="30.0" />
+                                    <Insets left="100.0" top="50.0" />
                                  </GridPane.margin>
                                  <font>
                                     <Font size="16.0" />
@@ -178,7 +197,7 @@
                                  <children>
                                     <TextField fx:id="t2_fname" prefHeight="5.0" prefWidth="281.0" promptText="First Name">
                                        <VBox.margin>
-                                          <Insets left="15.0" right="15.0" top="30.0" />
+                                          <Insets left="15.0" right="15.0" top="50.0" />
                                        </VBox.margin>
                                     </TextField>
                                     <TextField fx:id="t2_lname" prefHeight="5.0" prefWidth="281.0" promptText="Last Name">
@@ -198,7 +217,7 @@
                                     <Font size="16.0" />
                                  </font>
                                  <GridPane.margin>
-                                    <Insets left="28.0" top="15.0" />
+                                    <Insets left="64.0" top="15.0" />
                                  </GridPane.margin>
                                  <effect>
                                     <Glow />
@@ -206,7 +225,7 @@
                               </Text>
                               <Text fill="#5ca64f" strokeType="OUTSIDE" strokeWidth="0.0" text="New Appointment" GridPane.rowIndex="2" GridPane.valignment="TOP">
                                  <GridPane.margin>
-                                    <Insets left="24.0" top="15.0" />
+                                    <Insets left="60.0" top="15.0" />
                                  </GridPane.margin>
                                  <effect>
                                     <Glow />
@@ -232,20 +251,79 @@
                                     </ComboBox>
                                  </children>
                               </HBox>
-                              <ComboBox fx:id="t2_newTimeslot" prefWidth="150.0" promptText="New Timeslot" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                              <ComboBox fx:id="t2_newTimeslot" prefWidth="150.0" promptText="New Timeslot" GridPane.columnIndex="1" GridPane.rowIndex="2" GridPane.valignment="TOP">
                                  <GridPane.margin>
-                                    <Insets left="15.0" />
+                                    <Insets left="15.0" top="15.0" />
                                  </GridPane.margin>
                               </ComboBox>
-                              <Button fx:id="t2_rescheduleButton" mnemonicParsing="false" onAction="#rescheduleButtonClicked" prefHeight="25.0" prefWidth="170.0" text="Reschedule" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
+                              <Button fx:id="t2_rescheduleButton" mnemonicParsing="false" onAction="#rescheduleButtonClicked" prefHeight="30.0" prefWidth="206.0" text="Reschedule" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="3">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font></Button>
                            </children>
                         </GridPane>
                      </children></AnchorPane>
             </content>
           </Tab>
-            <Tab text="View Appts">
+            <Tab fx:id="tab3" text="View Appts">
                <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <VBox layoutX="-1.0" prefHeight="513.0" prefWidth="717.0">
+                           <children>
+                              <HBox alignment="CENTER_LEFT" prefHeight="78.0" prefWidth="616.0" spacing="20.0">
+                                 <children>
+                                    <Text strokeType="OUTSIDE" strokeWidth="0.0" text="SORT BY:">
+                                       <font>
+                                          <Font size="17.0" />
+                                       </font>
+                                       <effect>
+                                          <Glow />
+                                       </effect>
+                                       <HBox.margin>
+                                          <Insets bottom="2.0" left="15.0" />
+                                       </HBox.margin>
+                                    </Text>
+                                    <RadioButton fx:id="sort_PA" mnemonicParsing="false" onAction="#sortRadioButtonsClicked" text="PA">
+                                       <HBox.margin>
+                                          <Insets />
+                                       </HBox.margin>
+                                       <toggleGroup>
+                                          <ToggleGroup fx:id="sorts" />
+                                       </toggleGroup>
+                                       <font>
+                                          <Font size="13.0" />
+                                       </font>
+                                    </RadioButton>
+                                    <RadioButton fx:id="sort_PP" layoutX="25.0" layoutY="40.0" mnemonicParsing="false" onAction="#sortRadioButtonsClicked" text="PP" toggleGroup="$sorts">
+                                       <font>
+                                          <Font size="13.0" />
+                                       </font>
+                                    </RadioButton>
+                                    <RadioButton fx:id="sort_PL" layoutX="85.0" layoutY="39.0" mnemonicParsing="false" onAction="#sortRadioButtonsClicked" text="PL" toggleGroup="$sorts">
+                                       <font>
+                                          <Font size="13.0" />
+                                       </font>
+                                    </RadioButton>
+                                    <RadioButton fx:id="sort_PO" mnemonicParsing="false" onAction="#sortRadioButtonsClicked" text="PO" toggleGroup="$sorts">
+                                       <font>
+                                          <Font size="13.0" />
+                                       </font>
+                                    </RadioButton>
+                                    <RadioButton fx:id="sort_PI" mnemonicParsing="false" onAction="#sortRadioButtonsClicked" text="PI" toggleGroup="$sorts">
+                                       <font>
+                                          <Font size="13.0" />
+                                       </font>
+                                    </RadioButton>
+                                 </children>
+                              </HBox>
+                              <TextArea fx:id="sortOutput" editable="false" prefHeight="437.0" prefWidth="717.0">
+                                 <font>
+                                    <Font size="13.0" />
+                                 </font></TextArea>
+                           </children>
+                        </VBox>
+                     </children></AnchorPane>
                </content>
             </Tab>
             <Tab text="View Provider Cred">

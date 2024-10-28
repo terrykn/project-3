@@ -24,13 +24,17 @@ public class ClinicManagerController implements Initializable {
 
     public final int NEXTTECHNICIANINDEX = 0; // index of the next technician to check for availability in rotation list
     @FXML
-    private RadioButton officeVisit, imagingService; // radio buttons for apptTypeClicked
+    private RadioButton officeVisit, imagingService, sort_PA, sort_PP, sort_PL, sort_PO, sort_PI; // radio buttons for apptTypeClicked
     @FXML
     private ComboBox timeslot, providerOrImaging, t2_timeslot, t2_newTimeslot;
     @FXML
     private DatePicker apptDate, dob, t2_apptDate, t2_dob;
     @FXML
     private TextField fname, lname, t2_fname, t2_lname;
+    @FXML
+    private TextArea sortOutput;
+    @FXML
+    private Tab tab3;
     @FXML
     private Button scheduleButton, cancelButton, t2_rescheduleButton;
     /**
@@ -51,6 +55,9 @@ public class ClinicManagerController implements Initializable {
             t2_timeslot.getItems().add(new Timeslot(i));
             t2_newTimeslot.getItems().add(new Timeslot(i));
         }
+        // for tab 3, set its default when this is intialized
+        sort_PA.setSelected(true);
+        pa_pressed();
     }
     /**
      * for when the radio buttons are clicked in the schedule/cancel tab.
@@ -143,6 +150,7 @@ public class ClinicManagerController implements Initializable {
             alert.setContentText("Appointment for " + newAppt.patient + " booked at " + newAppt.getDate() + " " + newAppt.getTimeslot() + " with " + newAppt.getProvider());
             alert.setHeight(250);
             alert.showAndWait();
+            updateData();
         } else if (imagingService.isSelected()) {
             // check if next technician is available at timeslot, if not rotate
             // if it is available, check if the imaging room at the technicians location is available during that timeslot
@@ -176,6 +184,7 @@ public class ClinicManagerController implements Initializable {
                     alert.setHeight(250);
                     alert.showAndWait();
                     Sort.rotateTechnicians(this.allTechnicians);
+                    updateData();
                     return;
                 } else {
                     Sort.rotateTechnicians(this.allTechnicians);
@@ -246,6 +255,7 @@ public class ClinicManagerController implements Initializable {
             alert.setContentText(appointment.getDate() + " " + appointment.getTimeslot() + " " + (new Profile(fname.getText(), lname.getText(), new Date(dob.getValue()))) + " - appointment has been canceled.");
             alert.setHeight(250);
             alert.showAndWait();
+            updateData();
         } else {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Invalid Input");
@@ -330,9 +340,50 @@ public class ClinicManagerController implements Initializable {
         alert.setContentText("Appointment for " + appointment.getPatient() + " has been rescheduled to " + appointment.getDate() + " " + appointment.getTimeslot());
         alert.setHeight(250);
         alert.showAndWait();
+        updateData();
         return;
     }
+    @FXML
+    /**
+     * for when sort radio buttons are clicked
+     * @param event of the sort radio button being clicked
+     */
+    void sortRadioButtonsClicked(ActionEvent event) {
+        sortOutput.clear();
+        if (sort_PA.isSelected()) {
+            pa_pressed();
+        } else if (sort_PP.isSelected()) {
+            pp_pressed();
+        } else if (sort_PL.isSelected()) {
+            pl_pressed();
+        } else if (sort_PO.isSelected()) {
+            po_pressed();
+        } else if (sort_PI.isSelected()) {
+            pi_pressed();
+        }
+    }
 
+    /**
+     * for when an appt is canceled, added, or rescheduled, it updates tab3-5 to make sure the data is accurate
+     */
+    private void updateData() {
+        // FOR TAB 3 (update))
+        sortOutput.clear();
+        if (sort_PA.isSelected()) {
+            pa_pressed();
+        } else if (sort_PP.isSelected()) {
+            pp_pressed();
+        } else if (sort_PL.isSelected()) {
+            pl_pressed();
+        } else if (sort_PO.isSelected()) {
+            po_pressed();
+        } else if (sort_PI.isSelected()) {
+            pi_pressed();
+        }
+        // FOR TAB 4 (update)
+
+        // FOR TAB 5 (update)
+    }
     /**
      * Check if a date is a valid appointment date, which must be:
      * valid calendar date, not today, not a day before today, not a weekend, and within 6 months of today
@@ -494,6 +545,179 @@ public class ClinicManagerController implements Initializable {
             }
         }
         return true;
+    }
+    /**
+     * helper method for print commands to check if schedule calendar is empty
+     * @return true if the schedule calendar is empty, false otherwise
+     */
+    private boolean isScheduleCalendarEmpty() {
+        if (this.allAppts.size() == 0) {
+            sortOutput.setText("Schedule calendar is empty.");
+            return true;
+        }
+        return false;
+    }
+    /**
+     * Formats a number into the proper format including commas and periods "1,300.00"
+     * @param amount int type to convert to format with two decimal places
+     * @return String containing the amount in the proper format
+     */
+    private String formatMoneyString(double amount) {
+        return String.format("%,.2f", amount);
+    }
+    /**
+     * Clear the appt calendar (this.allAppts) but keep its length, but its size() is going to be zero because all appts are removed.
+     */
+    private void clearApptCalendar() {
+        while (this.allAppts.size() > 0) {
+            this.allAppts.remove(this.allAppts.get(0)); // all elements shift left so next element to remove is always index 0
+        }
+    }
+    /**
+     * Helper method for printing appointments to view how they are currently sorted by key
+     * @param key the ApptPrintTypes enum key of what to print
+     */
+    private void printAppts(ApptPrintTypes key) {
+        // Print the sorted appointments using the custom iterator
+        Iterator<Appointment> iterator = this.allAppts.iterator();
+        while (iterator.hasNext()) {
+            Appointment appt = iterator.next();
+            if (appt != null) {
+                if(key == ApptPrintTypes.ALL) {
+                    sortOutput.setText(sortOutput.getText() + appt + "\n");
+                } else if (key == ApptPrintTypes.IMAGING) {
+                    if (appt instanceof Imaging) {
+                        sortOutput.setText(sortOutput.getText() + appt + "\n");
+                    }
+                } else if (key == ApptPrintTypes.OFFICE) {
+                    if (!(appt instanceof Imaging)) { // if not imaging type its office type
+                        sortOutput.setText(sortOutput.getText() + appt + "\n");
+                    }
+                } else {
+                    //System.out.println("!!! Error in key input for printing appointments in ClinicManager, method printAppts");
+                }
+            }
+        }
+    }
+    /**
+     for when PS print billing statements is pressed, do just that
+     */
+    private void ps_pressed(){
+        if(isScheduleCalendarEmpty()) {return;}
+        Sort.patients(this.allPatients);
+        System.out.println("\n** Billing statement ordered by patient. **");
+        for (int i = 0; i < allPatients.size(); i++) {
+            int numberedItem = i + 1;
+            int totalCharge = 0;
+            Visit ptr = this.allPatients.get(i).getVisits();
+            while (ptr != null) {
+                totalCharge += ptr.getCharge();
+                ptr = ptr.getNext();
+            }
+            System.out.println("(" + numberedItem + ") " + this.allPatients.get(i) + " [due: $" + formatMoneyString(totalCharge) + "]");
+        }
+        sortOutput.setText(sortOutput.getText() + "** end of list **");
+        // remove all appts from appt calendar as they are now only in the visits of each patient
+        clearApptCalendar();
+    }
+    /**
+     * pc command prints the expected credit amounts for providers for seeing patients ordered by provider profile
+     */
+    private void pc_pressed() {
+        if (isScheduleCalendarEmpty()) {
+            return;
+        }
+        Sort.providers(this.allProviders);
+        System.out.println("\n** Credit amount ordered by provider. **");
+        for (int i = 0; i < allProviders.size(); i++) {
+            int numberedItem = i + 1;
+            int totalCharge = 0;
+            Provider provider = this.allProviders.get(i);
+            for (int j = 0; j < allAppts.size(); j++) {
+                Appointment appt = allAppts.get(j);
+                if (appt.getProvider().equals(provider)) {
+                    totalCharge += ((Provider) appt.getProvider()).rate();
+                }
+            }
+            System.out.println("(" + numberedItem + ") " + provider.getProfile() + " [credit amount: $" + formatMoneyString(totalCharge) + "]");
+        }
+        sortOutput.setText(sortOutput.getText() + "** end of list **");
+    }
+    /**
+     * PA Prints the appointments in the List object ordered by date/timeslot, provider name
+     */
+    private void pa_pressed() {
+        if(isScheduleCalendarEmpty()) {return;}
+        List<SortKey> sortBy = new List<SortKey>();
+        sortBy.add(SortKey.DATE);
+        sortBy.add(SortKey.TIMESLOT);
+        sortBy.add(SortKey.PROVIDER);
+        sortOutput.setText("** List of appointments, ordered by date/time/provider.\n");
+        Sort.appointment(this.allAppts, sortBy);
+        printAppts(ApptPrintTypes.ALL);
+        sortOutput.setText(sortOutput.getText() + "** end of list **");
+    }
+    /**
+     * pp command prints the appointments ordered by patient
+     * (by last name, first name, date of birth, then
+     * appointment date and time).
+     */
+    private void pp_pressed() {
+        if(isScheduleCalendarEmpty()) {return;}
+        List<SortKey> sortBy = new List<SortKey>();
+        sortBy.add(SortKey.PATIENT);
+        sortBy.add(SortKey.DATE);
+        sortBy.add(SortKey.TIMESLOT);
+        sortOutput.setText("** Appointments ordered by patient/date/time **\n");
+        Sort.appointment(this.allAppts, sortBy);
+        printAppts(ApptPrintTypes.ALL);
+        sortOutput.setText(sortOutput.getText() + "** end of list **");
+    }
+    /**
+     * pl command prints the appointments ordered by county name, appt date and time
+     */
+    private void pl_pressed() {
+        if(isScheduleCalendarEmpty()) {return;}
+        List<SortKey> sortBy = new List<SortKey>();
+        sortBy.add(SortKey.COUNTY);
+        sortBy.add(SortKey.DATE);
+        sortBy.add(SortKey.TIMESLOT);
+        sortOutput.setText("** List of appointments, ordered by county/date/time.\n");
+        Sort.appointment(this.allAppts, sortBy);
+        printAppts(ApptPrintTypes.ALL);
+        sortOutput.setText(sortOutput.getText() + "** end of list **");
+    }
+    /**
+     * po command to display the list of office appointments,
+     * sorted by the county name, then date and time.
+     */
+    private void po_pressed() {
+        if(isScheduleCalendarEmpty()) {return;}
+        List<SortKey> sortBy = new List<SortKey>();
+        sortBy.add(SortKey.COUNTY);
+        sortBy.add(SortKey.DATE);
+        sortBy.add(SortKey.TIMESLOT);
+        sortBy.add(SortKey.PROVIDER_FNAME); // if those all equal, then just sort by providers FIRSt name, didnt specify in directions, but shows in output
+        sortOutput.setText("** List of office appointments ordered by county/date/time.\n");
+        Sort.appointment(this.allAppts, sortBy);
+        printAppts(ApptPrintTypes.OFFICE);
+        sortOutput.setText(sortOutput.getText() + "** end of list **");
+    }
+    /**
+     * pi command to display the list of imaging appointments,
+     * sorted by the county name, then date and time.
+     */
+    private void pi_pressed() {
+        if(isScheduleCalendarEmpty()) {return;}
+        List<SortKey> sortBy = new List<SortKey>();
+        sortBy.add(SortKey.COUNTY);
+        sortBy.add(SortKey.DATE);
+        sortBy.add(SortKey.TIMESLOT);
+        sortBy.add(SortKey.PROVIDER_FNAME); // if those all equal, then just sort by providers FIRSt name, didnt specify in directions, but shows in output
+        sortOutput.setText("** List of radiology appointments ordered by county/date/time.\n");
+        Sort.appointment(this.allAppts, sortBy);
+        printAppts(ApptPrintTypes.IMAGING);
+        sortOutput.setText(sortOutput.getText() + "** end of list **");
     }
 }
 

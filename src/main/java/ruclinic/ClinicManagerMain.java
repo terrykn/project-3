@@ -12,7 +12,7 @@ public class ClinicManagerMain extends Application {
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(ClinicManagerMain.class.getResource("clinic-view.fxml"));
         //Scene scene = new Scene(fxmlLoader.load(), 320, 240);
-        Scene scene = new Scene(fxmlLoader.load(), 616, 444);
+        Scene scene = new Scene(fxmlLoader.load(), 716, 544);
         stage.setTitle("RU CLINIC MANAGER");
         stage.setResizable(false); // dont want them to be able to resize window
         stage.setScene(scene);
