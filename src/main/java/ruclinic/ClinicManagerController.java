@@ -1,5 +1,10 @@
 package ruclinic;
 
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -34,9 +39,11 @@ public class ClinicManagerController implements Initializable {
     @FXML
     private TextArea sortOutput;
     @FXML
-    private Tab tab3;
-    @FXML
     private Button scheduleButton, cancelButton, t2_rescheduleButton;
+    @FXML
+    private TableColumn<ObservableList<Object>, String> t4_fullName, t4_dob, t4_credits, t5_fullName, t5_dob, t5_due; // t4 is provider credit, t5 is patient billing
+    @FXML
+    private TableView<ObservableList<Object>> t4_table, t5_table;
     /**
      * initialize data for start
      */
@@ -58,6 +65,15 @@ public class ClinicManagerController implements Initializable {
         // for tab 3, set its default when this is intialized
         sort_PA.setSelected(true);
         pa_pressed();
+        // for tab 4 and 5 tableview need to set cell value factories
+        t4_fullName.setCellValueFactory(cellData -> new SimpleStringProperty((String) cellData.getValue().get(0)));
+        t5_fullName.setCellValueFactory(cellData -> new SimpleStringProperty((String) cellData.getValue().get(0)));
+        t4_dob.setCellValueFactory(cellData -> new SimpleStringProperty((String) cellData.getValue().get(1)));
+        t5_dob.setCellValueFactory(cellData -> new SimpleStringProperty((String) cellData.getValue().get(1)));
+        t4_credits.setCellValueFactory(cellData -> new SimpleStringProperty((String) cellData.getValue().get(2)));
+        t5_due.setCellValueFactory(cellData -> new SimpleStringProperty((String) cellData.getValue().get(2)));
+        populateTab4();
+        populateTab5();
     }
     /**
      * for when the radio buttons are clicked in the schedule/cancel tab.
@@ -327,10 +343,25 @@ public class ClinicManagerController implements Initializable {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Invalid Input");
             alert.setHeaderText("Provider Not Available");
-            alert.setContentText(convertProviderChoiceToProvider().getProfile() + " is not available at slot " + ((Timeslot) t2_newTimeslot.getValue()));
+            alert.setContentText(prov.getProfile() + " is not available at slot " + ((Timeslot) t2_newTimeslot.getValue()));
             alert.setHeight(250);
             alert.showAndWait();
             return;
+        }
+        // finally check that patient is available at this new timeslot as well (dont wanna double book!)
+        Patient patientInQuestion = checkPatientExists(patientFromInput);
+        Visit ptr = patientInQuestion.getVisits();
+        while(ptr != null) {
+            if (ptr.getAppt().getDate().equals(new Date(t2_apptDate.getValue())) && ptr.getAppt().getTimeslot().equals((Timeslot) t2_newTimeslot.getValue())) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Invalid Input");
+                alert.setHeaderText("Patient Not Available");
+                alert.setContentText("Patient Already Has Appointment at new timeslot, " + t2_newTimeslot.getValue());
+                alert.setHeight(250);
+                alert.showAndWait();
+                return;
+            }
+            ptr = ptr.getNext();
         }
         // now after all of that, we can finally rescchedule the appointment, changing it here also changes it in the visits linked list of the patient because they are same reference
         appointment.setTimeslot((Timeslot) t2_newTimeslot.getValue());
@@ -381,8 +412,63 @@ public class ClinicManagerController implements Initializable {
             pi_pressed();
         }
         // FOR TAB 4 (update)
-
+        t4_table.setItems(FXCollections.observableArrayList()); // this clears the data
+        populateTab4();
         // FOR TAB 5 (update)
+        t5_table.setItems(FXCollections.observableArrayList()); // this clears the data
+        populateTab5();
+    }
+    /**
+     * for updating data on tab 4
+     */
+    private void populateTab4() {
+        ObservableList<ObservableList<Object>> data = FXCollections.observableArrayList();
+        // make sure providers is sorted by name
+        Sort.providers(allProviders);
+        for (Provider p : allProviders) {
+            ObservableList<Object> row = FXCollections.observableArrayList();
+            // add providers full name and dob into first two cols
+            row.add(p.getProfile().getFname() + " " + p.getProfile().getLname());
+            row.add(p.getProfile().getDOB().toString());
+            // calculate credit for this provider and add to row
+            double totalCredit = 0;
+            for (Appointment appt : allAppts) {
+                if (appt.getProvider().equals(p)) {
+                    totalCredit += ((Provider) appt.getProvider()).rate();
+                }
+            }
+            row.add("$" + formatMoneyString(totalCredit));
+            // add our new row to the data table observable list we made
+            data.add(row);
+        }
+        // now set it as t4s table
+        t4_table.setItems(data);
+    }
+    /**
+     * populate tab5 patients and their billing statements
+     */
+    private void populateTab5() {
+        ObservableList<ObservableList<Object>> data = FXCollections.observableArrayList();
+        // make sure patients is sorted by name
+        Sort.patients(allPatients);
+        for (Patient p : allPatients) {
+            ObservableList<Object> row = FXCollections.observableArrayList();
+            // add patients full name and dob into first two cols
+            row.add(p.getProfile().getFname() + " " + p.getProfile().getLname());
+            row.add(p.getProfile().getDOB().toString());
+            // calculate billing for this patient and add to row
+            int totalCharge = 0;
+            Visit ptr = p.getVisits();
+            while (ptr != null) {
+                totalCharge += ptr.getCharge();
+                ptr = ptr.getNext();
+            }
+            row.add("$" + formatMoneyString(totalCharge));
+            // add our new row to the data table observable list we made
+            data.add(row);
+        }
+        // now set it as t5s table
+        t5_table.setItems(data);
     }
     /**
      * Check if a date is a valid appointment date, which must be:

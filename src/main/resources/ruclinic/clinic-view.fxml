@@ -7,6 +7,8 @@
 <?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToggleGroup?>
@@ -317,10 +319,7 @@
                                     </RadioButton>
                                  </children>
                               </HBox>
-                              <TextArea fx:id="sortOutput" editable="false" prefHeight="437.0" prefWidth="717.0">
-                                 <font>
-                                    <Font size="13.0" />
-                                 </font></TextArea>
+                              <TextArea fx:id="sortOutput" editable="false" prefHeight="437.0" prefWidth="717.0" />
                            </children>
                         </VBox>
                      </children></AnchorPane>
@@ -328,12 +327,36 @@
             </Tab>
             <Tab text="View Provider Cred">
                <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <VBox prefHeight="517.0" prefWidth="718.0">
+                           <children>
+                              <TableView fx:id="t4_table" prefHeight="517.0" prefWidth="718.0">
+                                <columns>
+                                  <TableColumn fx:id="t4_fullName" prefWidth="173.33333837985992" text="Provider Name" />
+                                  <TableColumn fx:id="t4_dob" prefWidth="96.00001525878906" text="Provider DOB" />
+                                    <TableColumn fx:id="t4_credits" prefWidth="161.33331298828125" text="Credit Amount ($)" />
+                                </columns>
+                              </TableView>
+                           </children></VBox>
+                     </children></AnchorPane>
                </content>
             </Tab>
             <Tab text="View Patient Billing">
                <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <VBox prefHeight="517.0" prefWidth="718.0">
+                           <children>
+                              <TableView fx:id="t5_table" prefHeight="526.0" prefWidth="718.0">
+                                <columns>
+                                  <TableColumn fx:id="t5_fullName" prefWidth="176.66665136814117" text="Patient Name" />
+                                  <TableColumn fx:id="t5_dob" prefWidth="97.33335876464844" text="Patient DOB" />
+                                    <TableColumn fx:id="t5_due" prefWidth="160.66668701171875" text="Due ($)" />
+                                </columns>
+                              </TableView>
+                           </children></VBox>
+                     </children></AnchorPane>
                </content>
             </Tab>
         </tabs>

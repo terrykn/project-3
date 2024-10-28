@@ -29,6 +29,10 @@ public class Profile implements Comparable<Profile>{
      */
     public String getLname() {return this.lname;}
     /**
+     * @return the DOB of the profile
+     */
+    public Date getDOB() {return this.dob;}
+    /**
      two profiles equal when they have the same fname, lname, and dob
      @param profileToCompare obj we need to make sure is another profile, then compare
      @return true if profiles equal, false otherwise
