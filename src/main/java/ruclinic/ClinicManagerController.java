@@ -8,7 +8,10 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.stage.FileChooser;
+import javafx.stage.Window;
 import util.*;
 
 import javax.swing.*;
@@ -39,7 +42,7 @@ public class ClinicManagerController implements Initializable {
     @FXML
     private TextArea sortOutput;
     @FXML
-    private Button scheduleButton, cancelButton, t2_rescheduleButton;
+    private Button scheduleButton, cancelButton, t2_rescheduleButton, chooseProviderFileButton, t1_clearInput, t2_clearInput;
     @FXML
     private TableColumn<ObservableList<Object>, String> t4_fullName, t4_dob, t4_credits, t5_fullName, t5_dob, t5_due; // t4 is provider credit, t5 is patient billing
     @FXML
@@ -49,13 +52,6 @@ public class ClinicManagerController implements Initializable {
      */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // load provider list and add providers that are DOCTORS to choice drop down
-        loadProvidersList();
-        for (Provider prov : allProviders) {
-            if (prov instanceof Doctor) {
-                this.providerOrImaging.getItems().add(prov.getProfile().getFname() + " " + prov.getProfile().getLname());
-            }
-        }
         // add timeslot options to choice drop down (1-12)
         for(int i = 1; i <= 12; i++) {
             timeslot.getItems().add(new Timeslot(i));
@@ -72,8 +68,34 @@ public class ClinicManagerController implements Initializable {
         t5_dob.setCellValueFactory(cellData -> new SimpleStringProperty((String) cellData.getValue().get(1)));
         t4_credits.setCellValueFactory(cellData -> new SimpleStringProperty((String) cellData.getValue().get(2)));
         t5_due.setCellValueFactory(cellData -> new SimpleStringProperty((String) cellData.getValue().get(2)));
-        populateTab4();
-        populateTab5();
+    }
+    /**
+     * button for choosing .txt file of Providers
+     * @param event of button being pressed
+     */
+    @FXML
+    void fileButtonPressed(ActionEvent event) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text Files","*.txt"));
+        // Get the window from the event source
+        Window window = ((Node) event.getSource()).getScene().getWindow();
+        File file = fileChooser.showOpenDialog(window);
+        if (file != null) {
+            try {
+                try {
+                    loadProvidersList();
+                } catch (Exception e) {
+                    System.out.println("extra for testing");
+                }
+            } catch (Exception e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Invalid File Input");
+                alert.setHeaderText("File is Incompatible");
+                alert.setContentText("Please Choose Another Compatible File.");
+                alert.showAndWait();
+                return;
+            }
+        }
     }
     /**
      * for when the radio buttons are clicked in the schedule/cancel tab.
@@ -395,6 +417,16 @@ public class ClinicManagerController implements Initializable {
     }
 
     /**
+     * helper method for opening file of providers
+     */
+    private void openFile(File file) {
+        try {
+
+        } catch (Exception ex) {
+
+        }
+    }
+    /**
      * for when an appt is canceled, added, or rescheduled, it updates tab3-5 to make sure the data is accurate
      */
     private void updateData() {
@@ -542,6 +574,24 @@ public class ClinicManagerController implements Initializable {
             }
             //System.out.println("Providers loaded to the list.");
             scanner.close();
+            // load provider list and add providers that are DOCTORS to choice drop down
+            for (Provider prov : allProviders) {
+                if (prov instanceof Doctor) {
+                    this.providerOrImaging.getItems().add(prov.getProfile().getFname() + " " + prov.getProfile().getLname());
+                }
+            }
+            // populate last 2 tabs now that we have our provider text chosen
+            populateTab4();
+            populateTab5();
+            // hide file chooser button for providers and disable
+            chooseProviderFileButton.setDisable(true);
+            chooseProviderFileButton.setOpacity(0);
+            // let user know successful file choose
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Successful File Upload");
+            alert.setHeaderText("Provider File has been loaded in successfully.");
+            alert.showAndWait();
+
         } catch (Exception e) {
             //System.out.println("An error occurred when trying to load in that file.");
         }
@@ -684,50 +734,6 @@ public class ClinicManagerController implements Initializable {
                 }
             }
         }
-    }
-    /**
-     for when PS print billing statements is pressed, do just that
-     */
-    private void ps_pressed(){
-        if(isScheduleCalendarEmpty()) {return;}
-        Sort.patients(this.allPatients);
-        System.out.println("\n** Billing statement ordered by patient. **");
-        for (int i = 0; i < allPatients.size(); i++) {
-            int numberedItem = i + 1;
-            int totalCharge = 0;
-            Visit ptr = this.allPatients.get(i).getVisits();
-            while (ptr != null) {
-                totalCharge += ptr.getCharge();
-                ptr = ptr.getNext();
-            }
-            System.out.println("(" + numberedItem + ") " + this.allPatients.get(i) + " [due: $" + formatMoneyString(totalCharge) + "]");
-        }
-        sortOutput.setText(sortOutput.getText() + "** end of list **");
-        // remove all appts from appt calendar as they are now only in the visits of each patient
-        clearApptCalendar();
-    }
-    /**
-     * pc command prints the expected credit amounts for providers for seeing patients ordered by provider profile
-     */
-    private void pc_pressed() {
-        if (isScheduleCalendarEmpty()) {
-            return;
-        }
-        Sort.providers(this.allProviders);
-        System.out.println("\n** Credit amount ordered by provider. **");
-        for (int i = 0; i < allProviders.size(); i++) {
-            int numberedItem = i + 1;
-            int totalCharge = 0;
-            Provider provider = this.allProviders.get(i);
-            for (int j = 0; j < allAppts.size(); j++) {
-                Appointment appt = allAppts.get(j);
-                if (appt.getProvider().equals(provider)) {
-                    totalCharge += ((Provider) appt.getProvider()).rate();
-                }
-            }
-            System.out.println("(" + numberedItem + ") " + provider.getProfile() + " [credit amount: $" + formatMoneyString(totalCharge) + "]");
-        }
-        sortOutput.setText(sortOutput.getText() + "** end of list **");
     }
     /**
      * PA Prints the appointments in the List object ordered by date/timeslot, provider name

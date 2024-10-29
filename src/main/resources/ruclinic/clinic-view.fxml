@@ -38,8 +38,8 @@
                           </columnConstraints>
                           <rowConstraints>
                             <RowConstraints maxHeight="207.3333282470703" minHeight="10.0" prefHeight="165.5555877685547" vgrow="SOMETIMES" />
-                            <RowConstraints maxHeight="222.0" minHeight="10.0" prefHeight="179.4444122314453" vgrow="SOMETIMES" />
-                            <RowConstraints maxHeight="201.99998982747394" minHeight="2.5431315123114473E-5" prefHeight="145.33333333333331" vgrow="SOMETIMES" />
+                            <RowConstraints maxHeight="222.0" minHeight="10.0" prefHeight="164.66665649414062" vgrow="SOMETIMES" />
+                            <RowConstraints maxHeight="201.99998982747394" minHeight="2.5431315123114473E-5" prefHeight="176.66667683919275" vgrow="SOMETIMES" />
                           </rowConstraints>
                            <children>
                               <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Appointment" GridPane.valignment="TOP">
@@ -116,7 +116,7 @@
                                     <Insets left="100.0" top="15.0" />
                                  </GridPane.margin>
                               </Text>
-                              <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                              <VBox prefHeight="196.0" prefWidth="305.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
                                  <children>
                                     <TextField fx:id="fname" prefHeight="25.0" prefWidth="271.0" promptText="First Name">
                                        <VBox.margin>
@@ -141,26 +141,43 @@
                                     </DatePicker>
                                  </children>
                               </VBox>
-                              <HBox prefHeight="134.0" prefWidth="305.0" spacing="30.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                              <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
                                  <children>
-                                    <Button fx:id="scheduleButton" mnemonicParsing="false" onAction="#scheduleButtonClicked" prefHeight="25.0" prefWidth="137.0" text="Schedule" textFill="#28861a">
-                                       <HBox.margin>
-                                          <Insets top="15.0" />
-                                       </HBox.margin>
+                                    <HBox prefHeight="64.0" prefWidth="305.0" spacing="30.0">
+                                       <children>
+                                          <Button fx:id="scheduleButton" mnemonicParsing="false" onAction="#scheduleButtonClicked" prefHeight="25.0" prefWidth="137.0" text="Schedule" textFill="#28861a">
+                                             <HBox.margin>
+                                                <Insets top="15.0" />
+                                             </HBox.margin>
+                                             <font>
+                                                <Font size="17.0" />
+                                             </font>
+                                          </Button>
+                                          <Button fx:id="cancelButton" mnemonicParsing="false" onAction="#cancelButtonClicked" prefHeight="25.0" prefWidth="137.0" text="Cancel" textFill="RED">
+                                             <HBox.margin>
+                                                <Insets top="15.0" />
+                                             </HBox.margin>
+                                             <font>
+                                                <Font size="17.0" />
+                                             </font>
+                                          </Button>
+                                       </children>
+                                    </HBox>
+                                    <Button fx:id="t1_clearInput" mnemonicParsing="false" text="Clear Input">
                                        <font>
-                                          <Font size="17.0" />
+                                          <Font size="14.0" />
                                        </font>
+                                       <VBox.margin>
+                                          <Insets left="105.0" top="5.0" />
+                                       </VBox.margin>
                                     </Button>
-                                    <Button fx:id="cancelButton" mnemonicParsing="false" onAction="#cancelButtonClicked" prefHeight="25.0" prefWidth="137.0" text="Cancel" textFill="RED">
-                                       <HBox.margin>
-                                          <Insets top="15.0" />
-                                       </HBox.margin>
-                                       <font>
-                                          <Font size="17.0" />
-                                       </font>
+                                    <Button fx:id="chooseProviderFileButton" mnemonicParsing="false" onAction="#fileButtonPressed" text="Choose File For Providers" textFill="#0009ff">
+                                       <VBox.margin>
+                                          <Insets left="75.0" top="20.0" />
+                                       </VBox.margin>
                                     </Button>
                                  </children>
-                              </HBox>
+                              </VBox>
                            </children>
                         </GridPane>
                      </children>
@@ -258,10 +275,26 @@
                                     <Insets left="15.0" top="15.0" />
                                  </GridPane.margin>
                               </ComboBox>
-                              <Button fx:id="t2_rescheduleButton" mnemonicParsing="false" onAction="#rescheduleButtonClicked" prefHeight="30.0" prefWidth="206.0" text="Reschedule" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="3">
-                                 <font>
-                                    <Font size="18.0" />
-                                 </font></Button>
+                              <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                                 <children>
+                                    <Button fx:id="t2_rescheduleButton" mnemonicParsing="false" onAction="#rescheduleButtonClicked" prefHeight="30.0" prefWidth="206.0" text="Reschedule">
+                                       <font>
+                                          <Font size="18.0" />
+                                       </font>
+                                       <VBox.margin>
+                                          <Insets left="50.0" top="20.0" />
+                                       </VBox.margin>
+                                    </Button>
+                                    <Button fx:id="t2_clearInput" mnemonicParsing="false" text="Clear Input">
+                                       <font>
+                                          <Font size="14.0" />
+                                       </font>
+                                       <VBox.margin>
+                                          <Insets left="110.0" top="20.0" />
+                                       </VBox.margin>
+                                    </Button>
+                                 </children>
+                              </VBox>
                            </children>
                         </GridPane>
                      </children></AnchorPane>
