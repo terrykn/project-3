@@ -83,7 +83,7 @@ public class ClinicManagerController implements Initializable {
         if (file != null) {
             try {
                 try {
-                    loadProvidersList();
+                    loadProvidersList(file);
                 } catch (Exception e) {
                     System.out.println("extra for testing");
                 }
@@ -542,9 +542,8 @@ public class ClinicManagerController implements Initializable {
      * provider s can be D (doctors) or T (technicians), which are both extensions
      * of the provider class with their own unique attributes
      */
-    private void loadProvidersList() {
+    private void loadProvidersList(File file) {
         try {
-            File file = new File("C:\\Users\\olivi\\IdeaProjects\\project-3\\src\\main\\java\\ruclinic\\providers.txt");
             Scanner scanner = new Scanner(file);
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
