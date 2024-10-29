@@ -85,7 +85,7 @@ public class ClinicManagerController implements Initializable {
                 try {
                     loadProvidersList(file);
                 } catch (Exception e) {
-                    System.out.println("extra for testing");
+                    //System.out.println("extra for testing");
                 }
             } catch (Exception e) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -415,16 +415,31 @@ public class ClinicManagerController implements Initializable {
             pi_pressed();
         }
     }
-
     /**
-     * helper method for opening file of providers
+     * for when clear button is pressed on the first tab
+     * @param event of t1 clear button being pressed
      */
-    private void openFile(File file) {
-        try {
-
-        } catch (Exception ex) {
-
-        }
+    @FXML
+    void t1_clearInputPRESSED(ActionEvent event) {
+        providerOrImaging.getSelectionModel().clearSelection();
+        apptDate.getEditor().clear();
+        fname.clear();
+        lname.clear();
+        dob.getEditor().clear();
+        timeslot.getSelectionModel().clearSelection();
+    }
+    /**
+     * for when clear button is pressed on the second tab
+     * @param event of t2 clear button being pressed
+     */
+    @FXML
+    void t2_clearInputPRESSED(ActionEvent event) {
+        t2_apptDate.getEditor().clear();
+        t2_fname.clear();
+        t2_lname.clear();
+        t2_dob.getEditor().clear();
+        t2_timeslot.getSelectionModel().clearSelection();
+        t2_newTimeslot.getSelectionModel().clearSelection();
     }
     /**
      * for when an appt is canceled, added, or rescheduled, it updates tab3-5 to make sure the data is accurate
@@ -699,14 +714,6 @@ public class ClinicManagerController implements Initializable {
      */
     private String formatMoneyString(double amount) {
         return String.format("%,.2f", amount);
-    }
-    /**
-     * Clear the appt calendar (this.allAppts) but keep its length, but its size() is going to be zero because all appts are removed.
-     */
-    private void clearApptCalendar() {
-        while (this.allAppts.size() > 0) {
-            this.allAppts.remove(this.allAppts.get(0)); // all elements shift left so next element to remove is always index 0
-        }
     }
     /**
      * Helper method for printing appointments to view how they are currently sorted by key

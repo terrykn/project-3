@@ -163,7 +163,7 @@
                                           </Button>
                                        </children>
                                     </HBox>
-                                    <Button fx:id="t1_clearInput" mnemonicParsing="false" text="Clear Input">
+                                    <Button fx:id="t1_clearInput" mnemonicParsing="false" onAction="#t1_clearInputPRESSED" text="Clear Input">
                                        <font>
                                           <Font size="14.0" />
                                        </font>
@@ -285,7 +285,7 @@
                                           <Insets left="50.0" top="20.0" />
                                        </VBox.margin>
                                     </Button>
-                                    <Button fx:id="t2_clearInput" mnemonicParsing="false" text="Clear Input">
+                                    <Button fx:id="t2_clearInput" mnemonicParsing="false" onAction="#t2_clearInputPRESSED" text="Clear Input">
                                        <font>
                                           <Font size="14.0" />
                                        </font>
