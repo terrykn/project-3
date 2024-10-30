@@ -608,6 +608,12 @@ public class ClinicManagerController implements Initializable {
 
         } catch (Exception e) {
             //System.out.println("An error occurred when trying to load in that file.");
+            // let user know successful file choose
+            providerOrImaging.getItems().clear();
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("File Is Incompatible");
+            alert.setHeaderText("File given is not a compatible list of providers.");
+            alert.showAndWait();
         }
     }
     /**
