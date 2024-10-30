@@ -236,7 +236,7 @@ public class ClinicManagerController implements Initializable {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Invalid Input");
             alert.setHeaderText("Technician Not Available");
-            alert.setContentText(convertProviderChoiceToProvider().getProfile() + " is not available at slot " + timeslot.getValue());
+            alert.setContentText("Cannot find an available technician at all locations for " + providerOrImaging.getValue() + " at " + timeslot.getValue());
             alert.setHeight(250);
             alert.showAndWait();
             return;
@@ -315,7 +315,7 @@ public class ClinicManagerController implements Initializable {
     }
     @FXML
     /**
-     * for rescheduling an appointment in tab 2
+     * for rescheduling an appointment in tab 2- FOR SIMPLICITY CANNOT RESCHEDULE IMAGING APPTS
      * @param event of the reschedule button being pressed
      */
     void rescheduleButtonClicked(ActionEvent event) {
