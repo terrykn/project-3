@@ -686,7 +686,7 @@ public class ClinicManagerController implements Initializable {
             allPatients.add(patient);
             return patient;
         } else {
-            System.out.println("The person is not a patient.");
+            //System.out.println("The person is not a patient.");
             return null;
         }
     }
