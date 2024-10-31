@@ -150,7 +150,7 @@
                                                 <Insets top="15.0" />
                                              </HBox.margin>
                                              <font>
-                                                <Font size="17.0" />
+                                                <Font name="System Bold" size="17.0" />
                                              </font>
                                           </Button>
                                           <Button fx:id="cancelButton" mnemonicParsing="false" onAction="#cancelButtonClicked" prefHeight="25.0" prefWidth="137.0" text="Cancel" textFill="RED">
@@ -158,7 +158,7 @@
                                                 <Insets top="15.0" />
                                              </HBox.margin>
                                              <font>
-                                                <Font size="17.0" />
+                                                <Font name="System Bold" size="17.0" />
                                              </font>
                                           </Button>
                                        </children>
@@ -279,7 +279,7 @@
                                  <children>
                                     <Button fx:id="t2_rescheduleButton" mnemonicParsing="false" onAction="#rescheduleButtonClicked" prefHeight="30.0" prefWidth="206.0" text="Reschedule">
                                        <font>
-                                          <Font size="18.0" />
+                                          <Font name="System Bold" size="18.0" />
                                        </font>
                                        <VBox.margin>
                                           <Insets left="50.0" top="20.0" />
@@ -381,7 +381,27 @@
                      <children>
                         <VBox prefHeight="517.0" prefWidth="718.0">
                            <children>
-                              <TableView fx:id="t5_table" prefHeight="526.0" prefWidth="718.0">
+                              <HBox prefHeight="0.0" prefWidth="718.0">
+                                 <children>
+                                    <Button fx:id="ps_Button" mnemonicParsing="false" onAction="#ps_pressed" prefHeight="29.0" prefWidth="71.0" text="PS" textFill="#1900ff">
+                                       <font>
+                                          <Font name="System Bold" size="14.0" />
+                                       </font>
+                                       <HBox.margin>
+                                          <Insets bottom="15.0" left="30.0" top="15.0" />
+                                       </HBox.margin>
+                                    </Button>
+                                    <Text fx:id="lastUpdatedText" fill="#2f00ff" opacity="0.0" strokeType="OUTSIDE" strokeWidth="0.0" text="last updated: ">
+                                       <font>
+                                          <Font name="System Italic" size="12.0" />
+                                       </font>
+                                       <HBox.margin>
+                                          <Insets left="10.0" top="28.0" />
+                                       </HBox.margin>
+                                    </Text>
+                                 </children>
+                              </HBox>
+                              <TableView fx:id="t5_table" prefHeight="457.0" prefWidth="718.0">
                                 <columns>
                                   <TableColumn fx:id="t5_fullName" prefWidth="176.66665136814117" text="Patient Name" />
                                   <TableColumn fx:id="t5_dob" prefWidth="97.33335876464844" text="Patient DOB" />

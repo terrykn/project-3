@@ -1,7 +1,4 @@
 package ruclinic;
-
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -10,17 +7,20 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
-import util.*;
-
-import javax.swing.*;
+import util.ApptPrintTypes;
+import util.Date;
+import util.List;
+import util.Sort;
+import util.SortKey;
 import java.io.File;
 import java.net.URL;
+import java.util.Calendar;
 import java.util.Iterator;
 import java.util.ResourceBundle;
 import java.util.Scanner;
-
 public class ClinicManagerController implements Initializable {
     List<Appointment> allAppts = new List<Appointment>(); // list of appointments
     List<Provider> allProviders = new List<Provider>(); // list of providers from the providers.txt
@@ -42,16 +42,21 @@ public class ClinicManagerController implements Initializable {
     @FXML
     private TextArea sortOutput;
     @FXML
-    private Button scheduleButton, cancelButton, t2_rescheduleButton, chooseProviderFileButton, t1_clearInput, t2_clearInput;
+    private Button chooseProviderFileButton;
     @FXML
     private TableColumn<ObservableList<Object>, String> t4_fullName, t4_dob, t4_credits, t5_fullName, t5_dob, t5_due; // t4 is provider credit, t5 is patient billing
     @FXML
     private TableView<ObservableList<Object>> t4_table, t5_table;
+    @FXML
+    private Text lastUpdatedText; // from tab 5 for when user prints patient billing statements
     /**
      * initialize data for start
      */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        // set placeholder text in tables while they are empty
+        t4_table.setPlaceholder(new Label("Need to add providers.txt (first tab)"));
+        t5_table.setPlaceholder(new Label("Schedule calendar is empty."));
         // add timeslot options to choice drop down (1-12)
         for(int i = 1; i <= 12; i++) {
             timeslot.getItems().add(new Timeslot(i));
@@ -457,7 +462,26 @@ public class ClinicManagerController implements Initializable {
         t2_newTimeslot.getSelectionModel().clearSelection();
     }
     /**
-     * for when an appt is canceled, added, or rescheduled, it updates tab3-5 to make sure the data is accurate
+     * for when the PS Button is pressed, make sure user wants to continue because if they do print patient billing statements,
+     * it clears the appointment calendar.
+     * @param event of the ps button of the last tab being pressed
+     */
+    @FXML
+    void ps_pressed(ActionEvent event) {
+        // FOR TAB 5 (update)
+        t5_table.setItems(FXCollections.observableArrayList()); // this clears the data
+        populateTab5();
+        // clear the appt calendar
+        while (this.allAppts.size() > 0) {
+            this.allAppts.remove(this.allAppts.get(0)); // this shifts all elements to the left so so the next element to be removed is always index 0
+        }
+        // update the last updated text
+        lastUpdatedText.setOpacity(1);
+        lastUpdatedText.setText("last updated: " + Calendar.getInstance().getTime() + ", appointment calendar CLEARED.");
+        updateData();
+    }
+    /**
+     * for when an appt is canceled, added, or rescheduled, it updates tab3-4 to make sure the data is accurate
      */
     private void updateData() {
         // FOR TAB 3 (update))
@@ -476,9 +500,6 @@ public class ClinicManagerController implements Initializable {
         // FOR TAB 4 (update)
         t4_table.setItems(FXCollections.observableArrayList()); // this clears the data
         populateTab4();
-        // FOR TAB 5 (update)
-        t5_table.setItems(FXCollections.observableArrayList()); // this clears the data
-        populateTab5();
     }
     /**
      * for updating data on tab 4
