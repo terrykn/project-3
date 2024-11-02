@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"m":"com.example.clinic","l":"ruclinic"},{"m":"com.example.clinic","l":"util"}];updateSearchResults();

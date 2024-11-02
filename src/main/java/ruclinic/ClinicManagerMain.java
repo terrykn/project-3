@@ -7,6 +7,10 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
+/**
+ * Runs the application ClinicManagerController and initializes the GUI with start()
+ * @author Terry Nguyen, Olivia Schroeder
+ */
 public class ClinicManagerMain extends Application {
     @Override
     public void start(Stage stage) throws IOException {

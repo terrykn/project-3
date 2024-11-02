@@ -21,6 +21,11 @@ import java.util.Calendar;
 import java.util.Iterator;
 import java.util.ResourceBundle;
 import java.util.Scanner;
+
+/**
+ * Main application file for implementing the logic of ClinicManager
+ * @author Terry Nguyen, Olivia Schroeder
+ */
 public class ClinicManagerController implements Initializable {
     List<Appointment> allAppts = new List<Appointment>(); // list of appointments
     List<Provider> allProviders = new List<Provider>(); // list of providers from the providers.txt
